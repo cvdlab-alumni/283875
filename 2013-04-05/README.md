@@ -1,0 +1,1 @@
+Repository di Marco Liceti per il corso di Grafica Computazionale.
