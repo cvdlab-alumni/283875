@@ -1,1 +1,3 @@
-Repository di Marco Liceti per il corso di Grafica Computazionale.
+* Wrote in Pyplasm
+* Translated to Plasm.js
+* So, Pyplasm version is a little more complete and nice
