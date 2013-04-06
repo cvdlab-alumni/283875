@@ -1,12 +1,58 @@
-# GRID implementation
+// Adapt Pyplasm code to Plasm.js code
 
-GRID = COMP([ INSR(PROD), AA(QUOTE) ])
+DIFF = function (x) { return -x; };
 
-# pillars
+T = function (dims) {
+  dims = dims.map(function (dim) {
+    return dim - 1;
+  });
+
+  return function (values) {
+    return function (object) {
+     return object.clone().translate(dims, values);
+    };
+  };
+};
+  
+R = function (dims) {
+  dims = dims.map(function (dim) {
+    return dim - 1;
+  });
+   
+  return function (angle) {
+    return function (object) {
+      return object.clone().rotate(dims, angle);
+    };
+  };
+};
+  
+S = function (dims) {
+  dims = dims.map(function (dim) {
+    return dim - 1;
+  });
+
+  return function (values) {
+    return function (object) {
+      return object.clone().scale(dims, values);
+    };
+  };
+};
+
+S3 = S2;
+S2 = S1;
+S1 = S0;
+
+GRID = SIMPLEX_GRID;
+
+NN = REPLICA;
+
+VIEW = DRAW;
+
+// pillars
 
 circle_radius = 2
 
-circle = T([1,2])([ circle_radius, circle_radius ])(CIRCLE(circle_radius)([32,1]))
+circle = T([1,2])([ circle_radius, circle_radius ])(CIRCLE(circle_radius)(32))
 
 square_side = circle_radius * 2
 
@@ -26,17 +72,17 @@ floor_thickness = 5
 
 t_z = T([3])([ distance_between_floors + floor_thickness ])
 
-# pillars0
+// pillars0
 
-pillars0_left_2D = STRUCT([ circle, t_x, STRUCT(NN(3)([ square, t_x ])) ])
+pillars0_left_2D = STRUCT([ circle, t_x, STRUCT(REPLICA(3)([ square, t_x ])) ])
 
-pillars0_right_2D = STRUCT(NN(5)([ circle, t_x ]))
+pillars0_right_2D = STRUCT(REPLICA(5)([ circle, t_x ]))
 
 pillars0_2D = STRUCT([ t_y(pillars0_left_2D), pillars0_right_2D ])
 
-pillars0 = PROD([ pillars0_2D, QUOTE([ distance_between_floors ]) ])
+pillars0 = EXTRUDE([distance_between_floors])(pillars0_2D)
 
-# pillars1
+// pillars1
 
 small_pillars1 = GRID([
 	[ square_side, -distance_x, square_side, -distance_x, square_side ],
@@ -52,7 +98,7 @@ high_pillars1 = GRID([
 
 pillars1 = STRUCT([ high_pillars1, t_x, t_x, small_pillars1 ])
 
-# pillars2
+// pillars2
 
 pillars2 = t_x(t_x(
 	GRID([
@@ -62,19 +108,19 @@ pillars2 = t_x(t_x(
 	])
 ))
 
-# pillars3
+// pillars3
 
 pillars3 = pillars2
 
-# pillars
+// pillars
 
 pillars = STRUCT([ pillars0, t_z, pillars1, t_z, pillars2, t_z, pillars3 ])
 
 
-##########
+//////////
 
 
-# floors
+// floors
 
 max_x = 4 * ( square_side + distance_x ) + square_side
 
@@ -86,11 +132,11 @@ margin_x = 35
 
 margin_y = 35
 
-# floor0
+// floor0
 
 floor0 = T([1,2,3])([ -margin_x / 2.0, -margin_y / 2.0, -floor_thickness ])( CUBOID([ max_x + margin_x, max_y + margin_y, floor_thickness ]) )
 
-# floor1
+// floor1
 
 stair_length = 50
 
@@ -120,7 +166,7 @@ floor1_c = GRID([
 
 floor1 = STRUCT([ floor1_a, floor1_b, floor1_c ])
 
-# floor2
+// floor2
 
 x_quotes = [ square_side, - (max_x - 2 * square_side), square_side ]
 
@@ -150,22 +196,9 @@ floor2_minor_basis = distance_x + square_side + distance_x
 
 floor2_d = T([1,2])([ max_x - square_side - floor2_major_basis, square_side + distance_y + square_side ])( CUBOID([ floor2_major_basis, stairs_width, floor_thickness ]) )
 
-floor2_e_2D = MKPOL([
-	[
-		[ floor2_major_basis - floor2_minor_basis, 0 ],
-		[ floor2_major_basis, 0 ],
-		[ floor2_major_basis, distance_y ],
-		[ 0, distance_y]
-	],
-	[ [ 1, 2, 3, 4 ] ],
-	None
-])
+floor2 = STRUCT([ floor2_a, floor2_b, floor2_c, floor2_d ])
 
-floor2_e = T([1,2])([ max_x - floor2_major_basis - square_side, square_side ])( PROD([ floor2_e_2D, QUOTE([ floor_thickness ]) ]) )
-
-floor2 = STRUCT([ floor2_a, floor2_b, floor2_c, floor2_d, floor2_e ])
-
-# floor3
+// floor3
 
 stair_length = 43
 
@@ -195,7 +228,7 @@ floor3_c = GRID([
 
 floor3 = STRUCT([ floor3_a, floor3_b, floor3_c ])
 
-# floor4
+// floor4
 
 x_quotes = [ - (max_x - 82), 82 ]
 
@@ -221,16 +254,17 @@ floor4_c = GRID([
 
 floor4 = STRUCT([ floor4_a, floor4_b, floor4_c ])
 
-# floors
+// floors
 
 floors = STRUCT([ floor0, T([3])([ distance_between_floors ]), floor1, t_z, floor2, t_z, floor3, t_z, floor4 ])
 
 
-##########
+//////////
 
-# vertical_enclosures
 
-# north
+// vertical_enclosures
+
+// north
 
 window_elevation = distance_between_floors / 2.0
 
@@ -262,7 +296,7 @@ north_c = GRID([
 
 north = STRUCT([ north_a, north_b, north_c ])
 
-# south
+// south
 
 south_a = GRID([
 	[ square_side ],
@@ -278,7 +312,7 @@ south_b = GRID([
 
 south = STRUCT([ south_a, south_b ])
 
-# east
+// east
 
 east_a_k1 = 12
 
@@ -350,7 +384,7 @@ east_c = GRID([
 
 east = STRUCT([ east_a, T([3])([ distance_between_floors + floor_thickness ])(east_b), T([3])([ 2 * (distance_between_floors + floor_thickness) ])(east_c) ])
 
-# west
+// west
 
 west_a = GRID([
 	[ -square_side, distance_x, -square_side, distance_x, -square_side, -distance_x, -square_side, distance_x, -square_side  ],
@@ -386,11 +420,11 @@ west_e = GRID([
 
 west = STRUCT([ west_a, west_b, west_c, west_d, west_e ])
 
-# vertical_enclosures
+// vertical_enclosures
 
 vertical_enclosures = STRUCT([ north, south, east, west ])
 
-# building (pillars, horizontal partitions and vertical enclosures)
+// building (pillars, horizontal partitions and vertical enclosures)
 
 building = STRUCT([ pillars, floors, vertical_enclosures ])
 
