@@ -97,7 +97,7 @@
     function outside() {
       var fffacades = facades();
       var pppillars = T([2])([ - ( 2 + 5 * 9 ) ])(pillars());
-      oooutside = STRUCT([ fffacades, pppillars ]);
+      var oooutside = STRUCT([ fffacades, pppillars ]);
       return COLOR(marble_color)(oooutside);
     };
 
